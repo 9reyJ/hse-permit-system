@@ -128,11 +128,35 @@ def index():
 
     return render_template("index.html")
 
-@app.route("admin/users/<int:employee_id>")
+@app.route("/admin/users")
 @role_required("admin")
 @login_required
-def admin_users(employee_id):
-    return redirect(url_for("index"))
+def admin_users():
+    with Session(engine) as db_session:
+        employees = db_session.query(Employee).all()
+    return render_template("admin_users.html", employees=employees)
+
+@app.route("/admin/users/<int:employee_id>/role", methods=["POST"])
+@role_required("admin")
+@login_required
+def update_role(employee_id):
+    new_role = request.form["role"]
+
+    if new_role not in ("requester", "ehs", "admin"):
+        flash("Invalid role")
+        return redirect(url_for("admin_users"))
+
+    with Session(engine) as db_session:
+        employee = db_session.query(Employee).filter_by(id=employee_id).first()
+        if employee is None:
+            flash("Employee not found")
+            return redirect(url_for("admin_users"))
+
+        employee.role = new_role
+        flash(f"Updated {employee.username}'s role to {new_role}")
+        db_session.commit()
+
+    return redirect(url_for("admin_users"))
 
 @app.route("/logout")
 @login_required

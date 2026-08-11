@@ -32,12 +32,19 @@ class Permit(Base):
             "status IN ('draft','submitted','approved','rejected','closed')",
             name="valid_status",
         ),
+        CheckConstraint(
+            "type IN ('hot_work','confined_space','electrical','work_at_height','excavation','cold_work','lifting')",
+            name="valid_type"
+        ),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     requester_id: Mapped[int] = mapped_column(ForeignKey("employees.id"))
     type: Mapped[str]
+    location: Mapped[str]
+    valid_from: Mapped[datetime]
+    valid_until: Mapped[datetime]
     status: Mapped[str] = mapped_column(default="draft")
     description: Mapped[str]
 

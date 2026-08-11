@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head lang="eng">
+    <h2>Current Users:</h2>
+</head>
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Full Name</th>
+                <th>Role</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for employee in employees %}
+                <tr>
+                    <td>{{ employee.username }}</td>
+                    <td>{{ employee.first_name }} {{ employee.last_name }}</td>
+                    <td>{{ employee.role }}</td>
+                    <td>
+                    <form method="POST" action="{{ url_for('update_role', employee_id=employee.id) }}">
+                        <select name="role">
+                        <option value="requester" {% if employee.role == "requester" %}selected{% endif %}>requester</option>
+                        <option value="ehs" {% if employee.role == "ehs" %}selected{% endif %}>ehs</option>
+                        <option value="admin" {% if employee.role == "admin" %}selected{% endif %}>admin</option>
+                        </select>
+                        <button type="submit">Update</button>
+                    </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
