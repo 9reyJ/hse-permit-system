@@ -71,7 +71,7 @@ def register():
                 session.add(new_user)
                 session.commit()
                 flash("Registered successfully!")
-                return redirect("/login")
+                return redirect(url_for("login"))
 
         except IntegrityError:
             flash("That username, email, or phone is already registered.")
@@ -95,7 +95,7 @@ def login():
             session["user_id"] = user.id
             session["role"] = user.role
             flash("Login Successful!")
-            return redirect("/")
+            return redirect(url_for("index"))
         else:
             flash("Invalid username and/or password!")
             return render_template("login.html")
@@ -128,14 +128,14 @@ def index():
 
     return render_template("index.html")
 
-@app.route("admin/users")
+@app.route("admin/users/<int:employee_id>")
 @role_required("admin")
 @login_required
-def admin_users():
-    return redirect("/")
+def admin_users(employee_id):
+    return redirect(url_for("index"))
 
 @app.route("/logout")
 @login_required
 def logout():
     session.clear()
-    return redirect("/login")
+    return redirect(url_for("login"))
