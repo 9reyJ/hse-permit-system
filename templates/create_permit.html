@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Create Permit
+{% endblock %}
+{% block main %}
+
+    <form action="{{ url_for('create_permit') }}" method="post">
+        <label for="requester">
+            <input type="text" id="requester" name="requester" placeholder="Full Name" required>
+        </label>
+        <label for="type">
+            <select class="form-select" name="type" id="type" required>
+                <option value="hot_work">Hot Work</option>
+                <option value="confined_space">Confined Space</option>
+                <option value="electrical">Electrical</option>
+                <option value="work_at_height">Work at Height</option>
+                <option value="excavation">Excavation</option>
+                <option value="cold_work">Cold Work</option>
+                <option value="lifting">Lifting</option>
+            </select>
+        </label>
+        <label for="location">
+            <input type="text" id="location" name="location" placeholder="Location" required>
+        </label>
+        <label>
+            <input type="datetime-local" id="valid_from" name="valid_from" required>
+        </label>
+        <label>
+            <input type="datetime-local" id="valid_until" name="valid_until" required>
+        </label>
+        <label>
+            <input type="text" id="description", name="description" placeholder="Description" required>
+        </label>
+        <button type="submit" class="btn btn-primary">Create Permit</button>
+    </form>
+
+{% endblock %}
