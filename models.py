@@ -36,6 +36,10 @@ class Permit(Base):
             "type IN ('hot_work','confined_space','electrical','work_at_height','excavation','cold_work','lifting')",
             name="valid_type"
         ),
+        CheckConstraint(
+            "valid_until > valid_from", 
+            name="valid_date_range"
+        ),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
