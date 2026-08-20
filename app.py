@@ -1,4 +1,5 @@
 import os
+import datetime as dt
 
 from auth import login_required, role_required
 from flask import Flask, flash, abort, url_for, redirect, render_template, request, session
@@ -127,6 +128,49 @@ def index():
         return render_template("index.html", permits=permits)
 
     return render_template("index.html")
+
+@app.route("/create_permit", methods=["GET", "POST"])
+@role_required("requester")
+@login_required
+def create_permit():
+
+    if request.method == "POST":
+        p_type = request.form["type"]
+        location = request.form["location"]
+        valid_from = request.form["valid_from"]
+        valid_until = request.form["valid_until"]
+        description = request.form["description"]
+
+        if not p_type or not location or not valid_from or not valid_until or not description:
+            flash("Missing one or many required fields!")
+            return redirect(url_for("create_permit"))
+
+        with Session(engine) as db_session:
+            permit = Permit(
+                requester_id = session["user_id"],
+                type = p_type,
+                location = location,
+                valid_from = dt.datetime.fromisoformat(valid_from),
+                valid_until = dt.datetime.fromisoformat(valid_until),
+                status = "submitted",
+                description = description
+            )
+            db_session.add(permit)
+            db_session.commit()
+
+            permit_action = PermitAction(
+                permit_id = permit.id,
+                actor_id = session["user_id"],
+                action = "submitted",
+                comment = "Initial Submission"
+            )
+            db_session.add(permit_action)
+            db_session.commit()
+
+            flash("Permit Created Successfully!")
+            return redirect(url_for("create_permit"))
+
+    return render_template("create_permit.html")
 
 @app.route("/admin/users")
 @role_required("admin")
