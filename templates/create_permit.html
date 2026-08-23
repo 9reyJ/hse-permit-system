@@ -6,9 +6,6 @@
 {% block main %}
 
     <form action="{{ url_for('create_permit') }}" method="post">
-        <label for="requester">
-            <input type="text" id="requester" name="requester" placeholder="Full Name" required>
-        </label>
         <label for="type">
             <select class="form-select" name="type" id="type" required>
                 <option value="hot_work">Hot Work</option>
