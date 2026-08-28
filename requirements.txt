@@ -1,7 +1,4 @@
 Flask
 Flask-Session
-pytz
-requests
-ask-Session
-pytz
-requests
+SQLAlchemy
+python-dotenv
