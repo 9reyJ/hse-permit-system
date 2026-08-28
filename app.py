@@ -7,7 +7,7 @@ from flask_session import Session as FlaskSession
 from database import engine
 from models import Employee, Permit, PermitAction
 from werkzeug.security import check_password_hash, generate_password_hash
-from sqlalchemy import select
+from sqlalchemy import select, desc
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload, selectinload
 from dotenv import load_dotenv
@@ -104,9 +104,9 @@ def login():
     session.clear()
     return render_template("login.html")
 
-@app.route("/")
-@role_required("requester", "ehs")
+@app.route("/", methods=["GET", "POST"])
 @login_required
+@role_required("requester", "ehs", "admin")
 def index():
     if session["role"] == "requester":
         with Session(engine) as db_session:
@@ -114,6 +114,7 @@ def index():
                 db_session.query(Permit)
                 .options(joinedload(Permit.requester), selectinload(Permit.actions))
                 .filter_by(requester_id=session["user_id"])
+                .order_by(Permit.created_at.desc())
                 .all()
             )
         return render_template("index.html", permits=permits)
@@ -123,11 +124,83 @@ def index():
             permits = (
                 db_session.query(Permit)
                 .options(joinedload(Permit.requester), selectinload(Permit.actions))
+                .order_by(Permit.created_at.desc())
                 .all()
             )
         return render_template("index.html", permits=permits)
 
+    if session["role"] == "admin":
+        return redirect(url_for('admin_users'))
+
     return render_template("index.html")
+
+
+@app.route("/permits/<int:id>/action", methods=["POST", "GET"])
+@role_required("ehs", "requester")
+@login_required
+def permit_action(id):
+
+    if session["role"] == "ehs":
+        action = request.form["action"]
+        if not action:
+            flash("Error! Could not understand request!")
+            return redirect("/")
+
+        comment = request.form.get("comment")
+        
+        with Session(engine) as db_session:
+            permit = db_session.query(Permit).filter_by(id=id).first()
+            if permit is None:
+                flash("Permit not found")
+                return redirect(url_for("index"))
+            if action == "approve":
+                permit.status = "approved"
+                permit_action = PermitAction (
+                    permit_id = id,
+                    actor_id = session["user_id"],
+                    action = "approved",
+                    comment = comment
+                )
+
+                flash("Permit Approved!")
+                db_session.add(permit_action)
+                db_session.commit()
+                return redirect(url_for("index"))
+
+            if action == "reject":
+                permit.status = "rejected"
+                permit_action = PermitAction (
+                    permit_id = id,
+                    actor_id = session["user_id"],
+                    action = "rejected",
+                    comment = comment
+                )
+                flash("Permit Rejected!")
+                db_session.add(permit_action)
+                db_session.commit()
+                return redirect(url_for("index"))
+    close = request.form["close"]
+    if not close:
+        flash("Error! Could not understand request!")
+        return redirect("/")
+    if session["role"] == "requester":
+        with Session(engine) as db_session:
+            permit = db_session.query(Permit).filter_by(id=id).first()
+            if permit is None:
+                flash("Permit not found")
+                return redirect(url_for("index"))
+            permit.status = "closed"
+            permit_action = PermitAction (
+                permit_id = id,
+                actor_id = session["user_id"],
+                action = "closed",
+            )
+            flash("Permit Closed!")
+            db_session.add(permit_action)
+            db_session.commit()
+            return redirect(url_for("index"))
+    return redirect(url_for("index"))
+
 
 @app.route("/create_permit", methods=["GET", "POST"])
 @role_required("requester")
