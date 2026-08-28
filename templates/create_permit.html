@@ -4,9 +4,9 @@
     Create Permit
 {% endblock %}
 {% block main %}
-
+    <div class="responsive-form">
     <form action="{{ url_for('create_permit') }}" method="post">
-        <label for="type">
+        <label for="type">Permit Type:</label>
             <select class="form-select" name="type" id="type" required>
                 <option value="hot_work">Hot Work</option>
                 <option value="confined_space">Confined Space</option>
@@ -16,20 +16,15 @@
                 <option value="cold_work">Cold Work</option>
                 <option value="lifting">Lifting</option>
             </select>
-        </label>
-        <label for="location">
+        <label for="location">Location:</label>
             <input type="text" id="location" name="location" placeholder="Location" required>
-        </label>
-        <label>
+        <label for="valid_from">Valid From:</label>
             <input type="datetime-local" id="valid_from" name="valid_from" required>
-        </label>
-        <label>
+        <label for="valid_until">Valid Until:</label>
             <input type="datetime-local" id="valid_until" name="valid_until" required>
-        </label>
-        <label>
-            <input type="text" id="description", name="description" placeholder="Description" required>
-        </label>
+        <label for="description">Description</label>
+            <textarea id="description", name="description" placeholder="Describe work..." required></textarea>
         <button type="submit" class="btn btn-primary">Create Permit</button>
     </form>
-
+    </div>
 {% endblock %}
