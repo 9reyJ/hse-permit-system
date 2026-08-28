@@ -5,7 +5,7 @@
 {% endblock %}
 {% block main %}
 
-    {% if session["user_id"] %}
+    {% if session.get("user_id") %}
         <h2>Work Permits</h2>
         <table class="table table-striped table-hover">
             
@@ -14,9 +14,14 @@
                     <th scope="col">Created at</th>
                     <th scope="col">Requester</th>
                     <th scope="col">Type</th>
+                    <th scope="col">Valid From</th>
+                    <th scope="col">Valid Until</th>
                     <th scope="col">Status</th>
                     <th scope="col">Description</th>
-                    <th scope="col">Actions</th>
+                    <th scope="col">Previous Actions</th>
+                    {% if session["role"] == "ehs" %}
+                        <th scope="col">Action</th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -27,6 +32,8 @@
                             <td>{{ permit.created_at }}</td>
                             <td>{{ permit.requester.first_name }} {{ permit.requester.last_name }}</td>
                             <td>{{ permit.type }}</td>
+                            <td>{{ permit.valid_from.strftime("%b %d, %Y %I:%M %p") }}</td>
+                            <td>{{ permit.valid_until.strftime("%b %d, %Y %I:%M %p") }}</td>
                             <td>{{ permit.status }}</td>
                             <td>{{ permit.description}}</td>
                             <td>
@@ -34,6 +41,45 @@
                                     <div>{{ action.action }} - {{ action.comment }}</div>
                                 {% endfor %}
                             </td>
+                            {% if session["role"] == "requester" and permit.status != "closed" and permit.status != "approved" and permit.status != "rejected" %}
+                            <td>
+                                <form method="POST" action="{{ url_for('permit_action', id=permit.id) }}">
+                                    <button type="submit" value="close" name="close" class="btn btn-danger">Close</button>                                    
+                                </form>
+                            </td>
+                            {% elif session["role"] == "ehs" and permit.status != "closed" and permit.status != "rejected" and permit.status != "approved" %}
+                                <td>
+                                    <button type="button" id="modalBtn" class="btn btn-danger" onclick="document.getElementById('modal-{{ permit.id }}').style.display='block'">Review</button>
+                                    <!--<form method="POST" action="{{ url_for('permit_action', id=permit.id) }}" method="post">
+                                        <button type="submit" value="reject" name="action" class="btn btn-warning">Reject</button>
+                                        <button type="submit" value="approve" name="action" class="btn btn-success">Approve</button> 
+                                    </form>-->
+                                </td>
+                                <div id="modal-{{ permit.id }}" class="modal">
+                                    <div class="modal-content">
+                                        <span class="close" onclick="document.getElementById('modal-{{ permit.id }}').style.display='none'">&times;</span>
+                                        <p>Created at: {{ permit.created_at }}</p>
+                                        <p>Requester: {{ permit.requester.first_name }} {{ permit.requester.last_name }}</p>
+
+                                        <p>Type: {{ permit.type }}</p>
+                                        
+                                        <p>Valid From: {{ permit.valid_from.strftime("%b %d, %Y %I:%M %p") }}</p>
+                                        
+                                        <p>Valid Until: {{ permit.valid_until.strftime("%b %d, %Y %I:%M %p") }}</p>
+                                        
+                                        <p>Status: {{ permit.status }}</p>
+                                            
+                                        <p>Description: {{ permit.description}}</p>
+                                        <form action="{{ url_for('permit_action', id=permit.id) }}" method="post">
+                                            <label for="floatingTextarea">Comments</label> 
+                                            <textarea class="form-control" name="comment" placeholder="EHS Instrucions" id="floatingTextarea"></textarea>
+
+                                            <button type="submit" value="reject" name="action" class="btn btn-warning">Reject</button>
+                                            <button type="submit" value="approve" name="action" class="btn btn-success">Approve</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                 {% endif %}
