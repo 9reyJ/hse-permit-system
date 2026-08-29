@@ -1,4 +1,4 @@
-#### Video Demo: https://youtu.be/Ay2-zpL-C44](https://youtu.be/dcjksQJeB5o
+#### Video Demo: https://youtu.be/dcjksQJeB5o
 
 # HSE Permit System
 
