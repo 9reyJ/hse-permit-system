@@ -1,4 +1,4 @@
-#### Video Demo:  <URL HERE>
+# Initial MVP v1.0
 
 #### Description: 
 
