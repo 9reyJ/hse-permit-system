@@ -12,7 +12,7 @@ reject them, and admins manage roles. Built with Flask + SQLAlchemy + SQLite.
 
 ## 1. What this project does
 
-A work-permit workflow is fundamentally a small state machine:
+A work-permit workflow is basically:
 
 - A **requester** fills in the type of hazardous work, where it happens, and
   when it is valid, then **submits** it.
@@ -20,9 +20,7 @@ A work-permit workflow is fundamentally a small state machine:
 - The requester later **closes** the permit once the work is done.
 
 Every transition is recorded so there is an auditable trail of who did what and
-when — that audit trail is the whole point of an HSE system. This is why the
-code separates the *permit* (the thing being approved) from the *permit action*
-(the record of each step), rather than just flipping a status column.
+when, that audit trail is the whole point of an HSE system.
 
 ### Roles
 
